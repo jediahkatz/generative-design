@@ -29,7 +29,7 @@ const getLines = () => {
   const hLines = [[0, 0, windowWidth], [windowHeight, 0, windowWidth]]
   // [x, y0, y1]
   const vLines = [[0, 0, windowHeight], [windowWidth, 0, windowHeight]]
-  for (let i=0; i<20; i++) {
+  for (let i=0; i<4; i++) {
     // randomly pick between adding horizontal and vertical lines
     if (int(random(2)) === 0) {
       // horizontal: randomly generate a y-coordinate
@@ -71,7 +71,25 @@ const getLines = () => {
 
 const doesLinePassThroughCoord = (line, point) => {
   const [_, c0, c1] = line
-  return (c0 <= point) && (point) <= c1
+  return (c0 <= point) && (point <= c1)
+}
+
+const getRectTopLeftCorners = ({ hLines, vLines }) => {
+  // for each hLine, get all vLines that intersect it,
+  // except where the intersection is the endpoint of either line
+  const topLeftCorners = hLines.flatMap(hLine => {
+    const [hy, hx0, hx1] = hLine
+    return vLines.filter(vLine => {
+      const [vx, vy0, vy1] = vLine
+      const intersectsAtTopLeftCorner = (
+        doesLinePassThroughCoord([hy, hx0, hx1-1], vx) &&
+        doesLinePassThroughCoord([vx, vy0, vy1-1], hy)
+        )
+        console.log(vx, hy, intersectsAtTopLeftCorner)
+      return intersectsAtTopLeftCorner
+    }).map(([vx,]) => [vx, hy])
+  })
+  return topLeftCorners
 }
 
 function draw() {
@@ -84,10 +102,19 @@ function draw() {
   saturationValues = [83, 86, 67, 0]
   brightnessValues = [82, 95, 98, 100]
 
-  fill(0, 0, 0)
-
   // ------ area tiling ------
   const { hLines, vLines } = getLines()
+  const topLeftCorners = getRectTopLeftCorners({ hLines, vLines })
+  topLeftCorners.forEach(([x, y], i) => {
+    // const color = random(hueValues.length)
+    const color = i % hueValues.length
+    fill(hueValues[color], saturationValues[color], brightnessValues[color])
+    // const hue = i * int(360 / topLeftCorners.length)
+    // fill(hue, 100, 100)
+    rect(x, y, windowWidth-x, windowHeight-y)
+  })
+
+  fill(0, 0, 0)
   hLines.forEach(([y, x0, x1]) => {
     rect(x0, y, x1-x0, 10)
   })
