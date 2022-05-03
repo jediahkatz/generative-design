@@ -76,6 +76,8 @@ function draw() {
       // get component color values
       fill(hueValues[index], saturationValues[index], brightnessValues[index]);
       rect(posX, posY, tileWidth, tileHeight);
+      textSize(42);
+      text(index + "," + counter, posX + 5, posY + 5);
       counter++;
     }
   }
